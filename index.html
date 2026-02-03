@@ -2,76 +2,226 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Supabase Auth + DB</title>
-    <script src="https://cdn.jsdelivr.net"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация - Supabase</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #181818; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        form { background: #242424; padding: 30px; border-radius: 12px; width: 320px; border: 1px solid #333; }
-        input { width: 100%; padding: 12px; margin: 8px 0; background: #333; border: 1px solid #444; color: white; border-radius: 6px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; background: #3ecf8e; border: none; color: white; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; }
-        button:hover { background: #36b37a; }
-        #msg { margin-top: 15px; font-size: 14px; text-align: center; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 450px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group i {
+            position: absolute;
+            left: 15px;
+            top: 40px;
+            color: #667eea;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 12px 12px 45px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 40px;
+            cursor: pointer;
+            color: #777;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(0, 0, 0, 0.1);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .users-count {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-user-plus"></i> Регистрация</h1>
+            <p>Создайте аккаунт для доступа к системе</p>
+        </div>
 
-<form id="regForm">
-    <h2 style="margin-top:0">Регистрация</h2>
-    <input type="text" id="username" placeholder="Придумайте логин" required>
-    <input type="email" id="email" placeholder="Ваша почта" required>
-    <input type="password" id="password" placeholder="Пароль (мин. 6 знаков)" required>
-    <button type="submit">Зарегистрироваться</button>
-    <div id="msg"></div>
-</form>
+        <div class="form-container">
+            <div class="users-count">
+                <i class="fas fa-users"></i> Зарегистрировано пользователей: <span id="usersCount">0</span>
+            </div>
 
-<script>
-    // СЮДА ВСТАВЬ СВОИ ДАННЫЕ
-    const SB_URL = 'https://dkyqegxdcerlqnfvodjd.supabase.co';
-    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRreXFlZ3hkY2VybHFuZnZvZGpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNTc2NzQsImV4cCI6MjA4NTYzMzY3NH0.n6KO-IQMZboeOMCnJQw6gAs8DdWFDZpevAOWBQrxFWA';
-    const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+            <form id="registrationForm">
+                <div class="form-group">
+                    <label for="username"><i class="fas fa-user"></i> Логин</label>
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="username" placeholder="Введите логин" required>
+                </div>
 
-    const form = document.getElementById('regForm');
-    const msg = document.getElementById('msg');
+                <div class="form-group">
+                    <label for="email"><i class="fas fa-envelope"></i> Электронная почта</label>
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" placeholder="Введите email" required>
+                </div>
 
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        msg.innerText = 'Связываемся с базой...';
-        msg.style.color = 'yellow';
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> Пароль</label>
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Введите пароль" required>
+                    <span class="password-toggle" id="passwordToggle">
+                        <i class="far fa-eye"></i>
+                    </span>
+                </div>
 
-        const userEmail = document.getElementById('email').value;
-        const userPass = document.getElementById('password').value;
-        const userName = document.getElementById('username').value;
+                <button type="submit" id="submitBtn">
+                    <i class="fas fa-user-plus"></i> Зарегистрироваться
+                </button>
+            </form>
 
-        // 1. Регистрация в Auth
-        const { data: authData, error: authError } = await supabaseClient.auth.signUp({
-            email: userEmail,
-            password: userPass
-        });
+            <div id="message" class="message" style="display: none;"></div>
+        </div>
 
-        if (authError) {
-            msg.innerText = 'Ошибка Auth: ' + authError.message;
-            msg.style.color = '#ff4d4d';
-            return;
-        }
+        <div class="footer">
+            <p>Все данные защищены | <a href="#" id="viewUsers">Просмотреть пользователей</a></p>
+        </div>
+    </div>
 
-        // 2. Запись в таблицу profiles
-        if (authData.user) {
-            const { error: dbError } = await supabaseClient
-                .from('profiles')
-                .insert([
-                    { id: authData.user.id, username: userName, email: userEmail }
-                ]);
-
-            if (dbError) {
-                msg.innerText = 'В Auth зашли, но в таблицу не записали: ' + dbError.message;
-                msg.style.color = '#ff4d4d';
-            } else {
-                msg.innerText = 'Успех! Данные в базе. Проверь почту!';
-                msg.style.color = '#3ecf8e';
-                form.reset();
-            }
-        }
-    });
-</script>
+    <!-- Подключаем Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="script.js"></script>
 </body>
 </html>
