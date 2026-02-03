@@ -2,64 +2,76 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Регистрация Supabase</title>
-    <!-- Подключаем Supabase SDK через CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Supabase Auth + DB</title>
+    <script src="https://cdn.jsdelivr.net"></script>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; padding-top: 50px; background: #f4f4f4; }
-        form { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 300px; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background: #3ecf8e; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        body { font-family: 'Segoe UI', sans-serif; background: #181818; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        form { background: #242424; padding: 30px; border-radius: 12px; width: 320px; border: 1px solid #333; }
+        input { width: 100%; padding: 12px; margin: 8px 0; background: #333; border: 1px solid #444; color: white; border-radius: 6px; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #3ecf8e; border: none; color: white; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 10px; }
         button:hover { background: #36b37a; }
+        #msg { margin-top: 15px; font-size: 14px; text-align: center; }
     </style>
 </head>
 <body>
 
-    <form id="regForm">
-        <h3>Регистрация</h3>
-        <input type="text" id="username" placeholder="Логин (Username)" required>
-        <input type="email" id="email" placeholder="Email" required>
-        <input type="password" id="password" placeholder="Пароль" required>
-        <button type="submit" id="btn">Создать аккаунт</button>
-        <p id="msg"></p>
-    </form>
+<form id="regForm">
+    <h2 style="margin-top:0">Регистрация</h2>
+    <input type="text" id="username" placeholder="Придумайте логин" required>
+    <input type="email" id="email" placeholder="Ваша почта" required>
+    <input type="password" id="password" placeholder="Пароль (мин. 6 знаков)" required>
+    <button type="submit">Зарегистрироваться</button>
+    <div id="msg"></div>
+</form>
 
-    <script>
-        // Инициализация Supabase
-        const supabaseUrl = 'https://dkyqegxdcerlqnfvodjd.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRreXFlZ3hkY2VybHFuZnZvZGpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNTc2NzQsImV4cCI6MjA4NTYzMzY3NH0.n6KO-IQMZboeOMCnJQw6gAs8DdWFDZpevAOWBQrxFWA';
-        const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+<script>
+    // СЮДА ВСТАВЬ СВОИ ДАННЫЕ
+    const SB_URL = 'https://dkyqegxdcerlqnfvodjd.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRreXFlZ3hkY2VybHFuZnZvZGpkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAwNTc2NzQsImV4cCI6MjA4NTYzMzY3NH0.n6KO-IQMZboeOMCnJQw6gAs8DdWFDZpevAOWBQrxFWA';
+    const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-        const form = document.getElementById('regForm');
-        const msg = document.getElementById('msg');
+    const form = document.getElementById('regForm');
+    const msg = document.getElementById('msg');
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            msg.innerText = 'Загрузка...';
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        msg.innerText = 'Связываемся с базой...';
+        msg.style.color = 'yellow';
 
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const username = document.getElementById('username').value;
+        const userEmail = document.getElementById('email').value;
+        const userPass = document.getElementById('password').value;
+        const userName = document.getElementById('username').value;
 
-            // 1. Регистрация пользователя в Auth (почта и пароль)
-            const { data, error } = await supabase.auth.signUp({
-                email: email,
-                password: password,
-                options: {
-                    // Сохраняем логин в метаданные пользователя
-                    data: { display_name: username }
-                }
-            });
+        // 1. Регистрация в Auth
+        const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+            email: userEmail,
+            password: userPass
+        });
 
-            if (error) {
-                msg.style.color = 'red';
-                msg.innerText = 'Ошибка: ' + error.message;
+        if (authError) {
+            msg.innerText = 'Ошибка Auth: ' + authError.message;
+            msg.style.color = '#ff4d4d';
+            return;
+        }
+
+        // 2. Запись в таблицу profiles
+        if (authData.user) {
+            const { error: dbError } = await supabaseClient
+                .from('profiles')
+                .insert([
+                    { id: authData.user.id, username: userName, email: userEmail }
+                ]);
+
+            if (dbError) {
+                msg.innerText = 'В Auth зашли, но в таблицу не записали: ' + dbError.message;
+                msg.style.color = '#ff4d4d';
             } else {
-                msg.style.color = 'green';
-                msg.innerText = 'Успех! Проверьте почту для подтверждения.';
+                msg.innerText = 'Успех! Данные в базе. Проверь почту!';
+                msg.style.color = '#3ecf8e';
                 form.reset();
             }
-        });
-    </script>
+        }
+    });
+</script>
 </body>
 </html>
