@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Регистрация - Supabase</title>
+    <title>Главная - Игровая система</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -14,7 +14,7 @@
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -23,16 +23,19 @@
         }
 
         .container {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .card {
             background: white;
             border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-            width: 100%;
-            max-width: 450px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
             overflow: hidden;
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f3460 0%, #533483 100%);
             color: white;
             padding: 30px 20px;
             text-align: center;
@@ -47,8 +50,35 @@
             opacity: 0.9;
         }
 
-        .form-container {
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            background: white;
+            border-bottom: 3px solid #533483;
+            color: #533483;
+        }
+
+        .tab-content {
+            display: none;
             padding: 30px;
+        }
+
+        .tab-content.active {
+            display: block;
         }
 
         .form-group {
@@ -67,10 +97,10 @@
             position: absolute;
             left: 15px;
             top: 40px;
-            color: #667eea;
+            color: #533483;
         }
 
-        .form-group input {
+        .form-group input, .form-group select {
             width: 100%;
             padding: 12px 12px 12px 45px;
             border: 2px solid #e1e1e1;
@@ -79,10 +109,10 @@
             transition: all 0.3s;
         }
 
-        .form-group input:focus {
-            border-color: #667eea;
+        .form-group input:focus, .form-group select:focus {
+            border-color: #533483;
             outline: none;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 0 3px rgba(83, 52, 131, 0.1);
         }
 
         .password-toggle {
@@ -94,7 +124,7 @@
         }
 
         button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #0f3460 0%, #533483 100%);
             color: white;
             border: none;
             padding: 15px;
@@ -155,7 +185,7 @@
         }
 
         .footer a {
-            color: #667eea;
+            color: #533483;
             text-decoration: none;
         }
 
@@ -163,60 +193,127 @@
             text-decoration: underline;
         }
 
-        .users-count {
-            background: #f8f9fa;
-            padding: 10px;
-            border-radius: 8px;
+        .stats {
+            display: flex;
+            justify-content: space-around;
             margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stat-item {
             text-align: center;
-            font-weight: 500;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #533483;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1><i class="fas fa-user-plus"></i> Регистрация</h1>
-            <p>Создайте аккаунт для доступа к системе</p>
-        </div>
-
-        <div class="form-container">
-            <div class="users-count">
-                <i class="fas fa-users"></i> Зарегистрировано пользователей: <span id="usersCount">0</span>
+        <div class="card">
+            <div class="header">
+                <h1><i class="fas fa-gamepad"></i> Игровая система</h1>
+                <p>Регистрация и вход в аккаунт</p>
             </div>
 
-            <form id="registrationForm">
-                <div class="form-group">
-                    <label for="username"><i class="fas fa-user"></i> Логин</label>
-                    <i class="fas fa-user"></i>
-                    <input type="text" id="username" placeholder="Введите логин" required>
+            <div class="tabs">
+                <div class="tab active" data-tab="login">Вход</div>
+                <div class="tab" data-tab="register">Регистрация</div>
+            </div>
+
+            <!-- Вход -->
+            <div id="login" class="tab-content active">
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalUsers">0</div>
+                        <div class="stat-label">Игроков</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="onlineUsers">0</div>
+                        <div class="stat-label">Онлайн</div>
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="email"><i class="fas fa-envelope"></i> Электронная почта</label>
-                    <i class="fas fa-envelope"></i>
-                    <input type="email" id="email" placeholder="Введите email" required>
-                </div>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginUsername"><i class="fas fa-user"></i> Логин или Email</label>
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="loginUsername" placeholder="Введите логин или email" required>
+                    </div>
 
-                <div class="form-group">
-                    <label for="password"><i class="fas fa-lock"></i> Пароль</label>
-                    <i class="fas fa-lock"></i>
-                    <input type="password" id="password" placeholder="Введите пароль" required>
-                    <span class="password-toggle" id="passwordToggle">
-                        <i class="far fa-eye"></i>
-                    </span>
-                </div>
+                    <div class="form-group">
+                        <label for="loginPassword"><i class="fas fa-lock"></i> Пароль</label>
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="loginPassword" placeholder="Введите пароль" required>
+                        <span class="password-toggle" data-target="loginPassword">
+                            <i class="far fa-eye"></i>
+                        </span>
+                    </div>
 
-                <button type="submit" id="submitBtn">
-                    <i class="fas fa-user-plus"></i> Зарегистрироваться
-                </button>
-            </form>
+                    <button type="submit" id="loginBtn">
+                        <i class="fas fa-sign-in-alt"></i> Войти в систему
+                    </button>
+                </form>
 
-            <div id="message" class="message" style="display: none;"></div>
-        </div>
+                <div id="loginMessage" class="message" style="display: none;"></div>
+            </div>
 
-        <div class="footer">
-            <p>Все данные защищены | <a href="#" id="viewUsers">Просмотреть пользователей</a></p>
+            <!-- Регистрация -->
+            <div id="register" class="tab-content">
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="registerUsername"><i class="fas fa-user"></i> Логин</label>
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="registerUsername" placeholder="Введите логин" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="registerEmail"><i class="fas fa-envelope"></i> Электронная почта</label>
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="registerEmail" placeholder="Введите email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="registerPassword"><i class="fas fa-lock"></i> Пароль</label>
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="registerPassword" placeholder="Введите пароль" required>
+                        <span class="password-toggle" data-target="registerPassword">
+                            <i class="far fa-eye"></i>
+                        </span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="userRole"><i class="fas fa-user-tag"></i> Роль</label>
+                        <i class="fas fa-user-tag"></i>
+                        <select id="userRole">
+                            <option value="player">Игрок</option>
+                            <option value="admin">Администратор</option>
+                            <option value="owner">Владелец</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" id="registerBtn">
+                        <i class="fas fa-user-plus"></i> Зарегистрироваться
+                    </button>
+                </form>
+
+                <div id="registerMessage" class="message" style="display: none;"></div>
+            </div>
+
+            <div class="footer">
+                <p>Система управления игровым сервером © 2024</p>
+            </div>
         </div>
     </div>
 
